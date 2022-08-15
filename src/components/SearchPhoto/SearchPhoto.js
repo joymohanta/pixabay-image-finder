@@ -5,26 +5,34 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import axios from "axios";
+import ImageResult from "../ImageResult/ImageResult";
 
 class SearchPhoto extends Component {
   state = {
     searchText: "",
-    amount: 10,
+    amount: 30,
     apiUrl: "https://pixabay.com/api",
     apiKey: "29163420-480b4517f6957dfc570a8d2b2",
     images: [],
   };
 
   onTextChange = (e) => {
-    this.setState({ [e.target.name]: e.target.value }, () => {
-      axios
-        .get(
-          `${this.state.apiUrl}/?key=${this.state.apiKey}&q=${this.state.searchText}&image_type=photo&per_page=${this.state.amount}&safesearch=true`
-        )
-        .then((res) => this.setState({ images: res.data.hits }))
-        .catch((err) => console.log(err));
+    const val = e.target.value;
+    this.setState({ [e.target.name]: val }, () => {
+      if (val === "") {
+        this.setState({ images: [] });
+      } else {
+        axios
+          .get(
+            `${this.state.apiUrl}/?key=${this.state.apiKey}&q=${this.state.searchText}&image_type=photo&per_page=${this.state.amount}&safesearch=true`
+          )
+          .then((res) => this.setState({ images: res.data.hits }))
+          .catch((err) => console.log(err));
+      }
     });
   };
+
+  onAmountChange = (e, index, value) => this.setState({ amount: value });
 
   render() {
     console.log(this.state.images);
@@ -57,11 +65,13 @@ class SearchPhoto extends Component {
             value={this.state.amount}
             onChange={this.onAmountChange}
           >
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
             <MenuItem value={30}>Thirty</MenuItem>
           </Select>
         </Box>
+        <br />
+        {this.state.images.length > 0 ? (
+          <ImageResult images={this.state.images}></ImageResult>
+        ) : null}
       </div>
     );
   }
